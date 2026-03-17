@@ -1,0 +1,90 @@
+/* Wayflyer design tokens — extracted from @wayflyer/flyui-tokens */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  /* Spacing */
+  --sizes-spacing-0: 0px;
+  --sizes-spacing-1: 4px;
+  --sizes-spacing-2: 8px;
+  --sizes-spacing-3: 12px;
+  --sizes-spacing-4: 16px;
+  --sizes-spacing-5: 20px;
+  --sizes-spacing-6: 24px;
+  --sizes-spacing-7: 28px;
+  --sizes-spacing-8: 32px;
+  --sizes-spacing-9: 36px;
+  --sizes-spacing-10: 40px;
+  --sizes-spacing-12: 48px;
+  --sizes-spacing-20: 80px;
+
+  /* Radius */
+  --sizes-radius-sm: 4px;
+  --sizes-radius-md: 8px;
+  --sizes-radius-lg: 12px;
+  --sizes-radius-xl: 16px;
+  --sizes-radius-2xl: 24px;
+  --sizes-radius-full: 9999px;
+
+  /* Typography */
+  --typography-fontSize-xs: 12px;
+  --typography-fontSize-sm: 14px;
+  --typography-fontSize-md: 16px;
+  --typography-fontSize-lg: 18px;
+  --typography-fontSize-xl: 20px;
+  --typography-fontSize-2xl: 22px;
+  --typography-fontSize-3xl: 24px;
+
+  /* Neutral backgrounds */
+  --palette-bg-neutral-base: #ffffff;
+  --palette-bg-neutral-subtle: #f9f9f8;
+  --palette-bg-neutral-medium: #f5f5f5;
+  --palette-bg-neutral-strong: #d9d9d9;
+  --palette-bg-neutral-inverse: #0d0d0d;
+  --palette-bg-neutral-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Accent */
+  --palette-bg-accent-strong: #001eff;
+  --palette-bg-accent-subtle: #e4edff;
+
+  /* Status backgrounds */
+  --palette-bg-status-neutral: #f5f5f5;
+  --palette-bg-status-neutralStrong: #737373;
+  --palette-bg-status-positive: #eafaee;
+  --palette-bg-status-positiveStrong: #3fa95b;
+  --palette-bg-status-warning: #fff4e5;
+  --palette-bg-status-warningStrong: #c47c2f;
+  --palette-bg-status-info: #e5f2ff;
+  --palette-bg-status-infoStrong: #1574cd;
+  --palette-bg-status-critical: #fef2f2;
+  --palette-bg-status-criticalStrong: #c20a0a;
+
+  /* Borders */
+  --palette-border-neutral-subtle: #d9d9d9;
+  --palette-border-neutral-strong: #8d8d8d;
+  --palette-border-neutral-inverse: #0d0d0d;
+
+  /* Content / text */
+  --palette-content-neutral-strong: #0d0d0d;
+  --palette-content-neutral-subtle: #737373;
+  --palette-content-neutral-onInverse: #ffffff;
+  --palette-content-status-positive: #3fa95b;
+  --palette-content-status-warning: #c47c2f;
+  --palette-content-status-info: #1574cd;
+  --palette-content-status-critical: #c20a0a;
+  --palette-content-status-neutralStrong: #454545;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  color: var(--palette-content-neutral-strong);
+  background-color: var(--palette-bg-neutral-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input {
+  font-family: inherit;
+}

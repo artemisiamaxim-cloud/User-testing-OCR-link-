@@ -1,0 +1,716 @@
+/* ── Page shell ─────────────────────────────────────────── */
+.page {
+  display: flex;
+  height: 100vh;
+  background-color: var(--palette-bg-neutral-base);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Sidebar (300px) ────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  flex-shrink: 0;
+  background-color: var(--palette-bg-neutral-subtle);
+  border-right: 1px solid var(--palette-border-neutral-subtle);
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  /* exact Figma value: p-[spacing/8 = 32px] */
+  padding: var(--sizes-spacing-8);
+  height: 80px;
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+  flex-shrink: 0;
+}
+
+/* Constrain the Logo to 130×24 px as per spec */
+.logoWrapper {
+  width: 130px;
+  height: 24px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logoWrapper img {
+  width: 130px !important;
+  height: 24px !important;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.sidebarMenu {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sizes-spacing-6);
+  flex: 1;
+  gap: var(--sizes-spacing-2);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-4);
+  padding: var(--sizes-spacing-3);
+  border-radius: 9999px;
+  min-height: 40px;
+  cursor: pointer;
+  color: var(--palette-content-neutral-strong);
+  text-decoration: none;
+}
+
+.navItem:hover {
+  background-color: var(--palette-bg-neutral-subtle);
+}
+
+.navItemActive {
+  background-color: rgba(0, 30, 255, 0.04);
+  color: #001eff;
+}
+
+.navItemActive:hover {
+  background-color: rgba(0, 30, 255, 0.07);
+}
+
+.navItemIcon {
+  display: block;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.navItemText {
+  color: inherit !important;
+}
+
+/* ── Main (1440px) ──────────────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  position: relative;
+}
+
+/* ── Top bar: exactly 80px tall, 24px h-padding ─────────── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  flex-shrink: 0;
+  padding: 0 var(--sizes-spacing-6);
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-2);
+  flex-shrink: 0;
+}
+
+.notificationWrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.notificationDot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--palette-bg-status-critical);
+  border-radius: 50%;
+  border: 2px solid var(--palette-bg-neutral-base);
+  pointer-events: none;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--palette-bg-neutral-subtle);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Page header (breadcrumb row): 120px tall, 80px h-padding ── */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  /* 80px left/right matches Figma frame offset x=80 within 1440px main */
+  padding: 40px 80px;
+  flex-shrink: 0;
+  background-color: var(--palette-bg-neutral-base);
+}
+
+/* ── Scrollable content: same 80px h-padding, centred table ── */
+.contentScroll {
+  flex: 1;
+  overflow-y: auto;
+  /* bottom pad clears the 80px action bar */
+  padding: 0 80px calc(80px + var(--sizes-spacing-10));
+}
+
+/* Centre table/upload at max 994px inside the 1280px content lane */
+.contentInner {
+  max-width: 994px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 52px; /* matches Figma gap between table section and upload area */
+  padding-top: var(--sizes-spacing-2);
+}
+
+/* ── Validation error row (below a table section) ──────── */
+.validationError {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.validationErrorIcon {
+  display: block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+.validationErrorText {
+  font-size: var(--typography-fontSize-xs); /* 12px */
+  line-height: 1.4;
+  color: var(--palette-content-status-critical);
+}
+
+/* ── Documents table ────────────────────────────────────── */
+.tableSection {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * Broker table column layout (total = 994px):
+ *   345 + 24 + 184 + 24 + 345 + 24 + 48 = 994px
+ * Client table column layout (no File column):
+ *   1fr + 24 + 184 + 24 + 48 = 994px
+ * Using grid column-gap: 24px so we only declare widths.
+ */
+.tableHeader,
+.tableRow {
+  display: grid;
+  grid-template-columns: 345px 184px 345px 48px;
+  column-gap: 24px;
+  align-items: center;
+}
+
+
+.tableHeader {
+  padding: var(--sizes-spacing-3) 0;
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+}
+
+/* First column: 16px left padding on both header and data rows */
+.tableHeader > :first-child,
+.tableRow > :first-child {
+  padding-left: var(--sizes-spacing-4);
+}
+
+/* Last column: 16px right padding on both header and data rows */
+.tableHeader > :last-child,
+.tableRow > :last-child {
+  padding-right: var(--sizes-spacing-4);
+}
+
+.tableRow {
+  min-height: 64px; /* Figma row height = 64px */
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+  /* No border-radius in the default state — keeps dividers perfectly straight */
+}
+
+/*
+ * Hover: inset shadow provides the outline without layout shift.
+ * border-bottom-color: transparent hides this row's own bottom divider.
+ * border-radius here only (not on the base rule) ensures default state
+ * has straight dividers.
+ */
+.tableRow:hover {
+  border-bottom-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--palette-border-neutral-strong);
+  border-radius: var(--sizes-radius-md);
+}
+
+/*
+ * When any row is being reassigned, freeze hover on every OTHER row so
+ * moving the mouse doesn't trigger the dark outline on unrelated rows.
+ * Only the actively-reassigning row keeps its outline (via .tableRowReassigning).
+ */
+.pageReassigning .tableRow:not(.tableRowReassigning):hover {
+  border-bottom-color: var(--palette-border-neutral-subtle);
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/*
+ * When the row immediately AFTER a normal row is hovered, the preceding
+ * row's bottom border would appear as a "top line" on the hovered row.
+ * Hide it with :has() + adjacent-sibling targeting.
+ */
+.tableRow:has(+ .tableRow:hover),
+.tableRow:has(+ .tableRowReassigning) {
+  border-bottom-color: transparent;
+}
+
+/*
+ * When the very first data row is hovered or reassigning, the table
+ * header's bottom border appears as a spurious top line on that row.
+ * Hide it using the same :has() pattern on the header element.
+ */
+.tableHeader:has(+ .tableRow:hover),
+.tableHeader:has(+ .tableRowReassigning) {
+  border-bottom-color: transparent;
+}
+
+.menuCell {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Post-upload flash highlight */
+@keyframes rowHighlight {
+  0% { background-color: var(--palette-bg-accent-subtle); }
+  100% { background-color: transparent; }
+}
+
+.tableRowHighlighted {
+  animation: rowHighlight 1.5s ease-out forwards;
+  border-radius: var(--sizes-radius-md);
+}
+
+/* Selected / reassigning: same outline + vertical padding to contain the input */
+.tableRowReassigning {
+  border-bottom-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--palette-border-neutral-strong);
+  border-radius: var(--sizes-radius-md);
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Reassign input: exact Figma dimensions override the base 32px height */
+.reassignInputWrapper {
+  width: 310px;
+  height: 40px;
+}
+
+/* Pushes the checkmark to the far right of a dropdown item */
+.dropdownItemCheck {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding-left: var(--sizes-spacing-3);
+}
+
+/* ── Assign document type input ────────────────────────── */
+
+/* Wrapper provides the bordered pill that contains the icon + input */
+.assignInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-2);
+  width: 100%;
+  height: 32px;
+  padding: 0 var(--sizes-spacing-3);
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.assignInputIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.assignInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--typography-fontSize-sm);
+  color: var(--palette-content-neutral-strong);
+}
+
+.assignInput::placeholder {
+  color: var(--palette-content-neutral-subtle);
+}
+
+/* Dropdown list that appears below the input */
+.assignDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background-color: var(--palette-bg-neutral-base);
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.02),
+    0px 4px 8px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.08);
+  overflow: clip;
+}
+
+.assignDropdownItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--sizes-spacing-3) var(--sizes-spacing-4);
+  font-size: var(--typography-fontSize-sm);
+  color: var(--palette-content-neutral-strong);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.assignDropdownItem:hover {
+  background-color: var(--palette-bg-neutral-subtle);
+}
+
+/* ── Toast notification ────────────────────────────────── */
+
+/* Shared toast shell — dark bg, centred in main, above action bar */
+.toastError,
+.toastSuccess {
+  position: absolute;
+  bottom: 96px; /* clears the 80px action bar + 16px gap */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center; /* vertically centres icon with text */
+  gap: var(--sizes-spacing-3); /* 12px between icon, text, and dismiss */
+  min-height: 48px;
+  min-width: 320px;
+  max-width: 600px;
+  padding: var(--sizes-spacing-2) var(--sizes-spacing-3) var(--sizes-spacing-2) var(--sizes-spacing-4);
+  border-radius: 16px;
+  background-color: var(--palette-bg-neutral-inverse);
+  box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.02),
+    0px 4px 8px 0px rgba(0, 0, 0, 0.04),
+    0px 16px 24px 0px rgba(0, 0, 0, 0.08);
+}
+
+.toastIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;    /* never squish the icon */
+  width: 16px;       /* exact 16×16 lock */
+  height: 16px;
+}
+
+.toastDismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border-radius: 9999px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: white;
+}
+
+/* Anchor for the absolutely-positioned popover */
+.menuCellRelative {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Kebab popover card */
+.popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 50;
+  min-width: 180px;
+  background-color: var(--palette-bg-neutral-base);
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.02),
+    0px 4px 8px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.08);
+  overflow: clip;
+}
+
+.popoverItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--sizes-spacing-3) var(--sizes-spacing-4);
+  font-size: var(--typography-fontSize-sm);
+  color: var(--palette-content-neutral-strong);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.popoverItem:hover {
+  background-color: var(--palette-bg-neutral-subtle);
+}
+
+.popoverItemDanger {
+  color: var(--palette-content-status-critical);
+}
+
+/* Two-line type column layout for connection rows */
+.typeCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Greyed-out type cell for not-applicable rows (Figma: opacity-50) */
+.typeCellMuted {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0.5;
+}
+
+.typeSubtext {
+  margin: 0;
+  font-size: var(--typography-fontSize-xs); /* 12px */
+  line-height: 1;
+}
+
+/* Force the link to the same 12px as the surrounding subtext */
+.typeSubtextLink {
+  font-size: var(--typography-fontSize-xs); /* 12px */
+}
+
+.typeSubtextGrey {
+  font-size: var(--typography-fontSize-xs); /* 12px */
+  color: var(--palette-content-neutral-subtle);
+}
+
+/* ── Learn How modal ────────────────────────────────────── */
+
+/* Full-page overlay — sits above the sidebar and main */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: var(--sizes-spacing-4);
+}
+
+/* Dialog card — 480px wide, 24px radius, Figma elevation/overlay-modal shadow */
+.modalDialog {
+  display: flex;
+  flex-direction: column;
+  width: 480px;
+  background-color: var(--palette-bg-neutral-base);
+  border-radius: 24px;
+  overflow: clip;
+  box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.02),
+    0px 4px 8px 4px rgba(0, 0, 0, 0.04),
+    0px 16px 24px -8px rgba(0, 0, 0, 0.08);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-4);
+  padding: 20px var(--sizes-spacing-6);
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+}
+
+/* Title fills available space; close button stays right */
+.modalHeader > :first-child {
+  flex: 1;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-4);
+  padding: var(--sizes-spacing-6);
+}
+
+.modalSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-2);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sizes-spacing-2);
+  padding: var(--sizes-spacing-4) var(--sizes-spacing-6);
+  border-top: 1px solid var(--palette-border-neutral-subtle);
+}
+
+/* ── Upload section ─────────────────────────────────────── */
+.uploadSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-3);
+}
+
+/*
+ * Loading state: replaces UploadArea entirely.
+ * Matches DropZone's visual shell — same min-height, border-radius, padding,
+ * and a CSS dashed border so the container looks identical.
+ */
+.loadingDropZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 136px;
+  border-radius: var(--sizes-radius-md);
+  border: 1px dashed var(--palette-border-neutral-strong);
+  background-color: var(--palette-bg-neutral-base);
+  padding: var(--sizes-spacing-3);
+}
+
+/* Flex column: pill wrapper + label, centred inside loadingDropZone */
+.progressBarContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Tight 2px #F9F9F8 pill hugging only the track */
+.progressBarPill {
+  background-color: #f9f9f8;
+  border-radius: 6px; /* track radius (4px) + 2px padding */
+  padding: 2px;
+}
+
+/* Track: 112px wide, 8px tall, #E5E5E4 empty background */
+.progressBarTrack {
+  width: 112px;
+  height: 8px;
+  background-color: #e5e5e4;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Fill: animates width with the brand gradient */
+.progressBarFill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(to right, #001eff, #00a1f8, #00ddfe);
+  /* smooth sub-50ms ticks */
+  transition: width 0.05s linear;
+}
+
+/* ── Action bar: 80px tall, pinned to bottom of main ────── */
+.actionBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  /* match Figma gap-[spacing/6=24px] + px-[spacing/6=24px] */
+  gap: var(--sizes-spacing-6);
+  padding: 0 var(--sizes-spacing-6);
+  background-color: var(--palette-bg-neutral-base);
+  border-top: 1px solid var(--palette-border-neutral-subtle);
+  z-index: 1;
+}
+
+/* ── Global drag-over overlay ───────────────────────────── */
+
+/* Full-screen backdrop — sits above everything */
+.dragOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  pointer-events: none; /* lets drag events pass through to the window listeners */
+}
+
+/* Centered card — matches Figma: 372px, white, 24px radius, subtle shadow */
+.dragCard {
+  width: 372px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--palette-bg-neutral-base);
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: 24px;
+  overflow: hidden; /* clips illustration to rounded corners */
+  box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.02),
+    0px 4px 8px 4px rgba(0, 0, 0, 0.04),
+    0px 16px 24px -8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+/* Illustration area: bleeds edge-to-edge at the top of the card */
+.dragCardIllustration {
+  width: 100%;
+  background-color: var(--palette-bg-neutral-subtle);
+  line-height: 0; /* removes inline-block gap under SVG */
+}
+
+.dragCardIllustration img,
+.dragCardIllustration svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Text section: padding inside the card */
+.dragCardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sizes-spacing-2);
+  padding: var(--sizes-spacing-6) var(--sizes-spacing-8) var(--sizes-spacing-8);
+}
