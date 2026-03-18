@@ -8,6 +8,7 @@ type Page = "list" | "application" | "documents";
 export default function App() {
   const [page, setPage] = useState<Page>("list");
   const [documentsKey, setDocumentsKey] = useState(0);
+  const [uploadedFilesCount, setUploadedFilesCount] = useState(0);
 
   if (page === "list") {
     return (
@@ -22,6 +23,7 @@ export default function App() {
       <ApplicationPage
         onUpload={() => setPage("documents")}
         onNavigateToApplications={() => setPage("list")}
+        uploadedFilesCount={uploadedFilesCount}
       />
     );
   }
@@ -31,7 +33,8 @@ export default function App() {
       key={documentsKey}
       onNavigateToCompany={() => setPage("application")}
       onNavigateToApplications={() => setPage("list")}
-      onSimulateRefresh={() => setDocumentsKey(k => k + 1)}
+      onSimulateRefresh={() => { setDocumentsKey(k => k + 1); setUploadedFilesCount(0); }}
+      onConfirm={(count) => { setUploadedFilesCount(count); setPage("application"); }}
     />
   );
 }

@@ -53,13 +53,16 @@ type ApplicationPageProps = {
   onUpload?: () => void;
   onNavigateToApplications?: () => void;
   userInitials?: string;
+  uploadedFilesCount?: number;
 };
 
 export const ApplicationPage = ({
   onUpload,
   onNavigateToApplications,
   userInitials = "WD",
+  uploadedFilesCount = 0,
 }: ApplicationPageProps) => {
+  const docsCompleted = uploadedFilesCount > 0;
   return (
     <div className={styles.page}>
       {/* Sidebar */}
@@ -228,14 +231,39 @@ export const ApplicationPage = ({
               <div className={styles.actionItems}>
                 {/* Customise indicative offer */}
                 <div className={styles.actionCard}>
-                  <Text fontWeight="medium">Customise indicative offer</Text>
-                  <Button variant="Secondary">Configure</Button>
+                  <Flex align="center" gap="2">
+                    <Text fontWeight="medium">Customise indicative offer</Text>
+                    {docsCompleted && (
+                      <span className={styles.completedBadge}>Completed</span>
+                    )}
+                  </Flex>
+                  <Button variant="Secondary">{docsCompleted ? "Manage" : "Configure"}</Button>
                 </div>
 
-                {/* Upload requirements */}
+                {/* Upload documents */}
                 <div className={styles.actionCard}>
-                  <Text fontWeight="medium">Upload requirements</Text>
-                  <Button variant="Secondary" onClick={onUpload}>Upload</Button>
+                  <div>
+                    <Flex align="center" gap="2">
+                      <Text fontWeight="medium">Upload documents</Text>
+                      {docsCompleted && (
+                        <span className={styles.completedBadge}>Completed</span>
+                      )}
+                    </Flex>
+                    {docsCompleted && (
+                      <div className={styles.fileCountRow}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <path d="M8.5 1.5H3.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V5l-3-3.5z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M8.5 1.5V5H12" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <Text size="sm" color="placeholder">
+                          {uploadedFilesCount} {uploadedFilesCount === 1 ? "file" : "files"} uploaded
+                        </Text>
+                      </div>
+                    )}
+                  </div>
+                  <Button variant="Secondary" onClick={onUpload}>
+                    {docsCompleted ? "Manage files" : "Upload"}
+                  </Button>
                 </div>
 
                 {/* Generate secure invite link */}

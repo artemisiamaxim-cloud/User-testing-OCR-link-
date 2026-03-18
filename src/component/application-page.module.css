@@ -286,6 +286,25 @@
   background-color: var(--palette-bg-neutral-base);
 }
 
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: var(--typography-fontSize-xs);
+  font-weight: 500;
+  background-color: var(--palette-bg-status-positive-subtle);
+  color: var(--palette-content-status-positive);
+}
+
+.fileCountRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--palette-content-neutral-subtle);
+}
+
 .inviteCard {
   border: 1px solid var(--palette-border-neutral-subtle);
   border-radius: var(--sizes-radius-md);

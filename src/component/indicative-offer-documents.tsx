@@ -59,7 +59,7 @@ export type IndicativeOfferDocumentsProps = {
   companyName?: string;
   onNavigateToApplications?: () => void;
   onNavigateToCompany?: () => void;
-  onConfirm?: () => void;
+  onConfirm?: (uploadedCount: number) => void;
   onFilesAdded?: (files: File[]) => void;
   onSimulateRefresh?: () => void;
   documents?: DocumentRow[];
@@ -526,8 +526,11 @@ export const IndicativeOfferDocuments = ({
 
   const isLoading = uploadPhase !== null;
   const brokerRequiredDocs = brokerDocs.filter((d) => d.status !== "not-applicable");
-  const brokerUploadedCount = brokerRequiredDocs.filter((d) => d.status === "uploaded").length;
-  const brokerTotalCount = brokerRequiredDocs.length;
+  // Count by unique type names so duplicate rows (dup-, tr-) don't inflate the totals
+  const requiredTypeNames = new Set(brokerRequiredDocs.map((d) => d.name));
+  const uploadedTypeNames = new Set(brokerRequiredDocs.filter((d) => d.status === "uploaded").map((d) => d.name));
+  const brokerTotalCount = requiredTypeNames.size;
+  const brokerUploadedCount = uploadedTypeNames.size;
 
   const hasOtherFiles = uncategorizedFiles.length > 0;
 
@@ -566,7 +569,7 @@ export const IndicativeOfferDocuments = ({
       return;
     }
 
-    onConfirm?.();
+    onConfirm?.(brokerUploadedCount);
   };
 
   return (
