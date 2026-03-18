@@ -1,0 +1,382 @@
+/* ── Page shell ─────────────────────────────────────────── */
+.page {
+  display: flex;
+  height: 100vh;
+  background-color: var(--palette-bg-neutral-base);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  flex-shrink: 0;
+  background-color: var(--palette-bg-neutral-subtle);
+  border-right: 1px solid var(--palette-border-neutral-subtle);
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  padding: var(--sizes-spacing-8);
+  height: 80px;
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+  flex-shrink: 0;
+}
+
+.logoWrapper {
+  width: 130px;
+  height: 24px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logoWrapper img {
+  width: 130px !important;
+  height: 24px !important;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.sidebarMenu {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sizes-spacing-6);
+  flex: 1;
+  gap: var(--sizes-spacing-2);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-4);
+  padding: var(--sizes-spacing-3);
+  border-radius: 9999px;
+  min-height: 40px;
+  cursor: pointer;
+  color: var(--palette-content-neutral-strong);
+  text-decoration: none;
+}
+
+.navItemActive {
+  background-color: rgba(0, 30, 255, 0.04);
+  color: #001eff;
+}
+
+.navItemIcon {
+  display: block;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.navItemText {
+  color: inherit !important;
+}
+
+/* ── Main ───────────────────────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  position: relative;
+}
+
+/* ── Top bar ────────────────────────────────────────────── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  flex-shrink: 0;
+  padding: 0 var(--sizes-spacing-6);
+  border-bottom: 1px solid var(--palette-border-neutral-subtle);
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-2);
+  flex-shrink: 0;
+}
+
+.notificationWrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.notificationDot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--palette-bg-status-critical);
+  border-radius: 50%;
+  border: 2px solid var(--palette-bg-neutral-base);
+  pointer-events: none;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--palette-bg-neutral-subtle);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Page header (breadcrumb row) ───────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 80px;
+  flex-shrink: 0;
+  background-color: var(--palette-bg-neutral-base);
+}
+
+/* ── Scrollable content ─────────────────────────────────── */
+.contentScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--sizes-spacing-10) calc(80px + var(--sizes-spacing-10));
+}
+
+/* ── Two-column layout ──────────────────────────────────── */
+.contentLayout {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: var(--sizes-spacing-8);
+  padding-top: var(--sizes-spacing-8);
+}
+
+/* ── Left column ────────────────────────────────────────── */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-6);
+  min-width: 0;
+}
+
+/* ── Breadcrumb row ─────────────────────────────────────── */
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-2);
+}
+
+/* ── Page title ─────────────────────────────────────────── */
+.pageTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Offer card ─────────────────────────────────────────── */
+.offerCard {
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-lg);
+  padding: var(--sizes-spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-5);
+  background-color: #F9F9FF;
+}
+
+.offerAmountLabel {
+  font-size: var(--typography-fontSize-xs);
+  color: var(--palette-content-neutral-subtle);
+  margin: 0;
+}
+
+.offerAmount {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--palette-content-neutral-strong);
+  margin: 0;
+}
+
+.offerSubject {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.offerTermsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sizes-spacing-4);
+}
+
+.offerTermItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.offerDivider {
+  border: none;
+  border-top: 1px solid var(--palette-border-neutral-subtle);
+  margin: 0;
+}
+
+/* ── View requirements section ──────────────────────────── */
+.requirementsBox {
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  padding: var(--sizes-spacing-4) var(--sizes-spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-4);
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.requirementsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-3);
+}
+
+.requirementItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sizes-spacing-3);
+}
+
+/* ── Action items section ───────────────────────────────── */
+.sectionLabel {
+  margin: 0;
+}
+
+.actionItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-3);
+}
+
+.actionCard {
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  padding: var(--sizes-spacing-4) var(--sizes-spacing-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sizes-spacing-4);
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.inviteCard {
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  padding: var(--sizes-spacing-4) var(--sizes-spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-3);
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.emailInputWrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  padding: 0 var(--sizes-spacing-4);
+  height: 40px;
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.emailInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--typography-fontSize-sm);
+  color: var(--palette-content-neutral-strong);
+}
+
+.emailInput::placeholder {
+  color: var(--palette-content-neutral-subtle);
+}
+
+/* ── Checkbox + legal ───────────────────────────────────── */
+.legalRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sizes-spacing-3);
+}
+
+.legalCheckbox {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--palette-bg-accent-strong);
+}
+
+/* ── Right column ───────────────────────────────────────── */
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-4);
+}
+
+.statusCard {
+  border: 1px solid var(--palette-border-neutral-subtle);
+  border-radius: var(--sizes-radius-md);
+  overflow: hidden;
+  background-color: var(--palette-bg-neutral-base);
+}
+
+.statusCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sizes-spacing-4) var(--sizes-spacing-5);
+  cursor: pointer;
+}
+
+.statusCardBody {
+  padding: var(--sizes-spacing-4) var(--sizes-spacing-5);
+  border-top: 1px solid var(--palette-border-neutral-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sizes-spacing-3);
+}
+
+/* ── Action bar ─────────────────────────────────────────── */
+.actionBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sizes-spacing-6);
+  background-color: var(--palette-bg-neutral-base);
+  border-top: 1px solid var(--palette-border-neutral-subtle);
+  z-index: 1;
+}

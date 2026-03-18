@@ -61,6 +61,7 @@ export type IndicativeOfferDocumentsProps = {
   onNavigateToCompany?: () => void;
   onConfirm?: () => void;
   onFilesAdded?: (files: File[]) => void;
+  onSimulateRefresh?: () => void;
   documents?: DocumentRow[];
   userInitials?: string;
 };
@@ -84,7 +85,7 @@ const BADGE_STATUS: Record<DocumentRow["status"], Status> = {
   uploaded: "positive",
   processing: "info",
   "awaiting-connection": "info",
-  "not-applicable": "info",
+  "not-applicable": "neutral",
 };
 
 const BADGE_LABEL: Record<DocumentRow["status"], string> = {
@@ -105,7 +106,7 @@ const ASSIGN_OPTIONS = [
   "Other",
 ];
 
-const BROKER_ROW_IDS = new Set(["1", "2", "4", "5"]);
+const BROKER_ROW_IDS = new Set(["1", "4", "5"]);
 
 const OPTION_TO_DOC_ID: Partial<Record<string, string>> = {
   "12 months P&L and Balance Sheet": "6",
@@ -121,19 +122,18 @@ const DOC_ID_TO_OPTION: Record<string, string> = Object.fromEntries(
 
 const defaultDocuments: DocumentRow[] = [
   { id: "1", name: "Tax returns", status: "awaiting" },
-  { id: "2", name: "IRS Form 8B21 (Wet Signed)", status: "awaiting" },
   { id: "4", name: "AR/AP Report (required if trades on terms)", status: "awaiting", hasMenu: true },
   { id: "5", name: "Debt Agreements (required if existing debt)", status: "awaiting", hasMenu: true },
   {
     id: "6",
-    name: "12 months P&L and Balance sheet",
+    name: "Accounting platform",
     status: "awaiting-connection",
     hasMenu: true,
-    connectionSubtext: "your client connects P&L",
+    connectionSubtext: "your client connects their platform",
   },
   {
     id: "7",
-    name: "Bank Account (Plaid)",
+    name: "Bank account connection (Plaid)",
     status: "awaiting-connection",
     hasMenu: false,
     connectionSubtext: "your client connects bank",
@@ -148,6 +148,7 @@ export const IndicativeOfferDocuments = ({
   onNavigateToCompany,
   onConfirm,
   onFilesAdded,
+  onSimulateRefresh,
   documents: documentsProp = defaultDocuments,
   userInitials = "WD",
 }: IndicativeOfferDocumentsProps) => {
@@ -171,11 +172,23 @@ export const IndicativeOfferDocuments = ({
 
   const otherSectionRef = useRef<HTMLElement>(null);
   const brokerSectionRef = useRef<HTMLElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const dragCounterRef = useRef(0);
   const uploadSectionRef = useRef<HTMLElement>(null);
+
+  // Scroll the inner content container directly — avoids browser picking window as scroll target
+  const scrollToSection = (sectionRef: React.RefObject<HTMLElement | null>) => {
+    const container = contentScrollRef.current;
+    const section = sectionRef.current;
+    if (!container || !section) return;
+    const containerRect = container.getBoundingClientRect();
+    const sectionRect = section.getBoundingClientRect();
+    const scrollTop = container.scrollTop + sectionRect.top - containerRect.top - 8;
+    container.scrollTo({ top: scrollTop, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (toast?.type !== "success") return;
@@ -275,7 +288,7 @@ export const IndicativeOfferDocuments = ({
           setOpenDropdownId(newId);
           setDropdownQuery("");
           setTimeout(() => {
-            otherSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            scrollToSection(otherSectionRef);
             setHighlightedId(newId);
             setTimeout(() => setHighlightedId(null), 1500);
           }, 50);
@@ -288,9 +301,7 @@ export const IndicativeOfferDocuments = ({
           setTimeout(() => setHighlightedId(null), 1500);
         }
         if (ocrFiles.length === 0) {
-          setTimeout(() => {
-            brokerSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 100);
+          setTimeout(() => scrollToSection(brokerSectionRef), 100);
         }
       }
     }, TICK_MS);
@@ -319,9 +330,7 @@ export const IndicativeOfferDocuments = ({
       const files = Array.from(e.dataTransfer?.files ?? []);
       if (files.length === 0 || timerRef.current !== null) return;
       startBatchSimulation(files.map((f) => f.name));
-      setTimeout(() => {
-        uploadSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
+      setTimeout(() => scrollToSection(uploadSectionRef), 50);
     };
 
     window.addEventListener("dragenter", onDragEnter);
@@ -498,8 +507,13 @@ export const IndicativeOfferDocuments = ({
 
     if (hasBlockingRows || hasUnassignedFiles) {
       setTimeout(() => {
-        const scrollTarget = hasOtherFiles && hasUnassignedFiles ? otherErrorRef.current : requirementsErrorRef.current;
-        scrollTarget?.scrollIntoView({ behavior: "smooth", block: "center" });
+        const container = contentScrollRef.current;
+        const target = hasOtherFiles && hasUnassignedFiles ? otherErrorRef.current : requirementsErrorRef.current;
+        if (container && target) {
+          const containerRect = container.getBoundingClientRect();
+          const targetRect = target.getBoundingClientRect();
+          container.scrollTo({ top: container.scrollTop + targetRect.top - containerRect.top - 100, behavior: "smooth" });
+        }
       }, 0);
       return;
     }
@@ -539,6 +553,9 @@ export const IndicativeOfferDocuments = ({
         <div className={styles.topBar}>
           <div />
           <div className={styles.topBarRight}>
+            <button onClick={onSimulateRefresh} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "0 12px", height: 32, border: "1px solid var(--palette-border-neutral-subtle)", borderRadius: 9999, background: "transparent", fontSize: "var(--typography-fontSize-xs)", fontWeight: 500, color: "var(--palette-content-neutral-subtle)", cursor: "pointer", whiteSpace: "nowrap" }}>
+              🔄 Simulate Refresh
+            </button>
             <IconButton
               variant="Tertiary"
               size="auto"
@@ -590,7 +607,7 @@ export const IndicativeOfferDocuments = ({
         </div>
 
         {/* Scrollable content */}
-        <div className={styles.contentScroll}>
+        <div ref={contentScrollRef} className={styles.contentScroll}>
           <div className={styles.contentInner}>
 
             {/* Other triage section */}
@@ -807,13 +824,17 @@ export const IndicativeOfferDocuments = ({
                         </div>
                       ) : (
                         <>
-                          <Text size="sm">{doc.name}</Text>
+                          <Text size="sm">
+                            {doc.id === "6" && isManualPnL
+                              ? "12 months P&L and balance sheet (Excel)"
+                              : doc.name}
+                          </Text>
                           {doc.id === "6" && isManualPnL && (
                             <p className={styles.typeSubtext}>
                               <Link className={styles.typeSubtextLink} onClick={() => setActiveModalType("manual")}>
-                                Learn about
+                                Learn how
                               </Link>
-                              <span className={styles.typeSubtextGrey}> manual upload</span>
+                              <span className={styles.typeSubtextGrey}> to get a faster underwriting result</span>
                             </p>
                           )}
                         </>
@@ -1044,7 +1065,9 @@ export const IndicativeOfferDocuments = ({
           <div className={styles.modalDialog} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <Text id="pnl-modal-title" size="lg" fontWeight="semiBold" lineHeight="tight">
-                12 months P&amp;L and Balance sheet
+                {activeModalType === "manual"
+                  ? "A quicker way to share your client\u2019s financials"
+                  : "Accounting platform"}
               </Text>
               <IconButton
                 variant="Secondary"
@@ -1059,23 +1082,22 @@ export const IndicativeOfferDocuments = ({
               <>
                 <div className={styles.modalContent}>
                   <div className={styles.modalSection}>
-                    <Text size="base" fontWeight="semiBold">How &ldquo;Awaiting connection&rdquo; works</Text>
+                    <Text size="base" fontWeight="semiBold">How &ldquo;client to connect&rdquo; works</Text>
                     <Text size="sm" color="placeholder" lineHeight="normal">
-                      This task is assigned to your client. Once they sign in to Wayflyer via your link, they will be
-                      prompted to securely connect their accounting software (e.g., QuickBooks or Xero).
+                      When your client signs in to Wayflyer via the invite link you share, they&rsquo;ll be prompted to
+                      connect their accounting software (e.g., QuickBooks, Xero). No files to upload on your end.
                     </Text>
                   </div>
                   <div className={styles.modalSection}>
-                    <Text size="base" fontWeight="semiBold">Why this is the default:</Text>
+                    <Text size="base" fontWeight="semiBold">Why this is the best way to share financial statements</Text>
                     <Text size="sm" color="placeholder" lineHeight="normal">
-                      Connections provide the fastest route to a final offer.
+                      Direct connections give us real time data, so underwriting is faster and you get to a final offer sooner.
                     </Text>
                   </div>
                   <div className={styles.modalSection}>
                     <Text size="base" fontWeight="semiBold">Prefer to upload files yourself?</Text>
                     <Text size="sm" color="placeholder" lineHeight="normal">
-                      Select Upload file manually from the menu (&#8942;). Please note that manual reconciliation for
-                      .xlsx files adds 24&ndash;48 hours to underwriting.
+                      Select Upload file manually from the menu (&#8942;). Note that manual uploads add 24&ndash;48 hours to underwriting.
                     </Text>
                   </div>
                 </div>
@@ -1087,27 +1109,22 @@ export const IndicativeOfferDocuments = ({
               <>
                 <div className={styles.modalContent}>
                   <div className={styles.modalSection}>
-                    <Text size="base" fontWeight="semiBold">Manual upload selected</Text>
                     <Text size="sm" color="placeholder" lineHeight="normal">
-                      You have chosen to upload these documents yourself.
+                      You&rsquo;ve chosen to upload financial statements manually on your client&rsquo;s behalf.
+                      Processing manually uploaded statements adds 24-48 hours to underwriting time.
                     </Text>
                   </div>
                   <div className={styles.modalSection}>
-                    <Text size="base" fontWeight="semiBold">Underwriting Impact:</Text>
+                    <Text size="base" fontWeight="semiBold">Ask your client to connect their accounting platform instead</Text>
                     <Text size="sm" color="placeholder" lineHeight="normal">
-                      Manual reconciliation for .xlsx files adds 24&ndash;48 hours to the process.
-                    </Text>
-                  </div>
-                  <div className={styles.modalSection}>
-                    <Text size="base" fontWeight="semiBold">Changed your mind?</Text>
-                    <Text size="sm" color="placeholder" lineHeight="normal">
-                      Switch back to Client connection now to get an instant decision once your client links their account.
+                      The invite link you share will prompt your client to connect their accounting platform alongside
+                      their bank account. No separate outreach from Wayflyer, and it speeds up underwriting.
                     </Text>
                   </div>
                 </div>
                 <div className={styles.modalFooter}>
                   <Button variant="Secondary" onClick={() => setActiveModalType(null)}>Continue with manual</Button>
-                  <Button variant="Primary" onClick={switchToConnection}>Client to connect</Button>
+                  <Button variant="Primary" onClick={switchToConnection}>Ask client to connect</Button>
                 </div>
               </>
             )}
@@ -1127,7 +1144,7 @@ export const IndicativeOfferDocuments = ({
           <div className={styles.modalDialog} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <Text id="bank-modal-title" size="lg" fontWeight="semiBold" lineHeight="tight">
-                Bank account (Plaid)
+                Bank account connection (Plaid)
               </Text>
               <IconButton
                 variant="Secondary"
@@ -1141,16 +1158,14 @@ export const IndicativeOfferDocuments = ({
               <div className={styles.modalSection}>
                 <Text size="base" fontWeight="semiBold">How bank connection works</Text>
                 <Text size="sm" color="placeholder" lineHeight="normal">
-                  To move the application forward, your client needs to securely connect their business bank account.
-                  Once they sign in via your link, they will be prompted to do this through Plaid.
+                  Your client connects their business bank account through open banking via the invite link you share.
                 </Text>
               </div>
               <div className={styles.modalSection}>
                 <Text size="base" fontWeight="semiBold">Why this is the default:</Text>
                 <Text size="sm" color="placeholder" lineHeight="normal">
-                  Plaid allows us to pull bank data directly so we can underwrite faster and get you a final offer
-                  sooner. It only takes a couple of minutes, and Wayflyer never sees or stores the client&rsquo;s bank
-                  login details.
+                  Plaid pulls bank data directly so we can underwrite faster and get you a final offer sooner.
+                  Wayflyer never sees or stores your client&rsquo;s bank login details.
                 </Text>
               </div>
               <div className={styles.modalSection}>
