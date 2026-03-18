@@ -98,12 +98,13 @@ const BADGE_LABEL: Record<DocumentRow["status"], string> = {
 
 const ASSIGN_OPTIONS = [
   "12 months P&L and Balance Sheet",
-  "Tax returns",
-  "IRS Form 8821 (Wet Signed)",
   "AR/AP Report",
+  "Bank statement",
   "Debt Agreements",
-  "Personal Financial Statement",
+  "IRS Form 8821 (Wet Signed)",
   "Other",
+  "Personal Financial Statement",
+  "Tax returns",
 ];
 
 const BROKER_ROW_IDS = new Set(["1", "4", "5"]);
@@ -217,6 +218,9 @@ export const IndicativeOfferDocuments = ({
   }, []);
 
   const startBatchSimulation = (fileNames: string[]) => {
+    // Capture at drop time — determines which Balance_Sheet scenario applies
+    const isManualPnLAtStart = isManualPnL;
+
     setUploadProgress(0);
     setUploadPhase("uploading");
 
@@ -244,32 +248,46 @@ export const IndicativeOfferDocuments = ({
         setUploadPhase(null);
         setUploadProgress(0);
 
-        const ocrFiles = fileNames.filter((f) => f === "Unknown.pdf");
-        const processableFiles = fileNames.filter((f) => f !== "Unknown.pdf");
+        const ocrFiles = fileNames.filter((f) => f === "Unknown.pdf" || f === "PFSPhoto.pdf");
+        const balanceSheetFile = fileNames.find((f) => f === "Balance_Sheet.xlsx") ?? null;
+        const processableFiles = fileNames.filter((f) => f !== "Unknown.pdf" && f !== "PFSPhoto.pdf" && f !== "Balance_Sheet.xlsx");
         let lastTargetId: string | null = null;
 
         setDocs((prev) => {
           let next = [...prev];
+
+          // Determine which doc row a filename should match
+          const getTargetRowName = (fileName: string): string | null => {
+            const lower = fileName.toLowerCase();
+            if (lower.includes("tax return")) return "Tax returns";
+            if (lower.includes("debt agreement")) return "Debt Agreements (required if existing debt)";
+            if (lower.includes("ar_ap") || lower.includes("ar/ap") || lower.includes("arap") || lower === "scan.pdf") return "AR/AP Report (required if trades on terms)";
+            return null;
+          };
+
           processableFiles.forEach((fileName, fileIdx) => {
-            if (fileName.toLowerCase().includes("tax return")) {
-              const awaitingIdx = next.findIndex((d) => d.name === "Tax returns" && d.status === "awaiting");
+            const targetRowName = getTargetRowName(fileName);
+
+            if (targetRowName) {
+              // Try to find an awaiting row with that exact name
+              const awaitingIdx = next.findIndex((d) => d.name === targetRowName && d.status === "awaiting");
               if (awaitingIdx !== -1) {
                 lastTargetId = next[awaitingIdx].id;
                 const tid = lastTargetId;
                 next = next.map((d) => (d.id === tid ? { ...d, status: "uploaded" as const, fileName } : d));
               } else {
-                let lastTaxIdx = -1;
-                next.forEach((d, i) => {
-                  if (d.name === "Tax returns") lastTaxIdx = i;
-                });
-                if (lastTaxIdx !== -1) {
-                  const newId = `tr-${Date.now()}-${fileIdx}`;
+                // Row already uploaded — insert a duplicate after the last matching row
+                let lastMatchIdx = -1;
+                next.forEach((d, i) => { if (d.name === targetRowName) lastMatchIdx = i; });
+                if (lastMatchIdx !== -1) {
+                  const newId = `dup-${Date.now()}-${fileIdx}`;
                   lastTargetId = newId;
-                  const clone: DocumentRow = { ...next[lastTaxIdx], id: newId, status: "uploaded" as const, fileName };
-                  next = [...next.slice(0, lastTaxIdx + 1), clone, ...next.slice(lastTaxIdx + 1)];
+                  const clone: DocumentRow = { ...next[lastMatchIdx], id: newId, status: "uploaded" as const, fileName };
+                  next = [...next.slice(0, lastMatchIdx + 1), clone, ...next.slice(lastMatchIdx + 1)];
                 }
               }
             } else {
+              // Fallback: fill first available awaiting slot
               const idx = next.findIndex((d) => d.status === "awaiting");
               if (idx !== -1) {
                 lastTargetId = next[idx].id;
@@ -293,6 +311,33 @@ export const IndicativeOfferDocuments = ({
             setTimeout(() => setHighlightedId(null), 1500);
           }, 50);
         });
+
+        if (balanceSheetFile) {
+          if (!isManualPnLAtStart) {
+            // Scenario 1: client connection mode → switch to manual and upload
+            setIsManualPnL(true);
+            setDocs((prev) =>
+              prev.map((d) =>
+                d.id === "6"
+                  ? { ...d, status: "uploaded" as const, fileName: balanceSheetFile }
+                  : d
+              )
+            );
+            setToast({
+              type: "success",
+              message: "12-month P&L recognised. Client accounting connection is no longer required.",
+            });
+          } else {
+            // Scenario 2: already manual mode → just upload
+            setDocs((prev) =>
+              prev.map((d) =>
+                d.id === "6"
+                  ? { ...d, status: "uploaded" as const, fileName: balanceSheetFile }
+                  : d
+              )
+            );
+          }
+        }
 
         onFilesAdded?.(fileNames.map((name) => new File([], name)));
 
@@ -400,8 +445,9 @@ export const IndicativeOfferDocuments = ({
     const doc = docs.find((d) => d.id === id);
     const isTaxReturns = doc?.name === "Tax returns";
     const taxReturnCount = isTaxReturns ? docs.filter((d) => d.name === "Tax returns").length : 0;
+    const isDupRow = id.startsWith("dup-");
 
-    if (isTaxReturns && taxReturnCount > 1) {
+    if ((isTaxReturns && taxReturnCount > 1) || isDupRow) {
       setDocs((prev) => prev.filter((d) => d.id !== id));
     } else {
       setDocs((prev) =>
@@ -423,9 +469,10 @@ export const IndicativeOfferDocuments = ({
   const reassignCategory = (rowId: string, fileName: string, category: string) => {
     const rowDoc = docs.find((d) => d.id === rowId);
     const isTaxClone = rowDoc?.name === "Tax returns" && docs.filter((d) => d.name === "Tax returns").length > 1;
+    const isDupRow = rowId.startsWith("dup-");
     const docId = OPTION_TO_DOC_ID[category];
 
-    if (isTaxClone) {
+    if (isTaxClone || isDupRow) {
       if (docId) {
         setDocs((prev) =>
           prev
@@ -473,13 +520,14 @@ export const IndicativeOfferDocuments = ({
   ];
 
   const brokerDocs = sortedDocs.filter(
-    (d) => BROKER_ROW_IDS.has(d.id) || d.id.startsWith("tr-") || (d.id === "6" && isManualPnL)
+    (d) => BROKER_ROW_IDS.has(d.id) || d.id.startsWith("tr-") || d.id.startsWith("dup-") || (d.id === "6" && isManualPnL)
   );
   const clientDocs = sortedDocs.filter((d) => d.id === "7" || (d.id === "6" && !isManualPnL));
 
   const isLoading = uploadPhase !== null;
-  const brokerUploadedCount = brokerDocs.filter((d) => d.status === "uploaded").length;
-  const brokerTotalCount = BROKER_ROW_IDS.size + (isManualPnL ? 1 : 0);
+  const brokerRequiredDocs = brokerDocs.filter((d) => d.status !== "not-applicable");
+  const brokerUploadedCount = brokerRequiredDocs.filter((d) => d.status === "uploaded").length;
+  const brokerTotalCount = brokerRequiredDocs.length;
 
   const hasOtherFiles = uncategorizedFiles.length > 0;
 
@@ -763,7 +811,7 @@ export const IndicativeOfferDocuments = ({
                 const showMenuForOtherStates = doc.hasMenu && doc.id !== "6" && (doc.status === "awaiting" || isNA);
                 const showMenuForPnLManual = doc.id === "6" && isManualPnL;
                 const showPopover = showMenuForUploaded || showMenuForOtherStates || showMenuForPnLManual;
-                const displayStatus = doc.id === "6" && isManualPnL ? ("awaiting" as const) : doc.status;
+                const displayStatus = doc.id === "6" && isManualPnL && doc.status !== "uploaded" ? ("awaiting" as const) : doc.status;
                 const reassignFiltered = ASSIGN_OPTIONS.filter((opt) =>
                   opt.toLowerCase().includes(reassignQuery.toLowerCase())
                 );
@@ -858,7 +906,27 @@ export const IndicativeOfferDocuments = ({
                           />
                           {openMenuId === doc.id && (
                             <div className={styles.popover} role="menu">
-                              {showMenuForPnLManual ? (
+                              {showMenuForPnLManual && doc.status === "uploaded" ? (
+                                <>
+                                  <button
+                                    className={styles.popoverItem}
+                                    role="menuitem"
+                                    onClick={() => startReassign(doc.id)}
+                                  >
+                                    Reassign document type
+                                  </button>
+                                  <button className={styles.popoverItem} role="menuitem" onClick={switchToConnection}>
+                                    Client to connect
+                                  </button>
+                                  <button
+                                    className={`${styles.popoverItem} ${styles.popoverItemDanger}`}
+                                    role="menuitem"
+                                    onClick={() => deleteFile(doc.id)}
+                                  >
+                                    Delete file
+                                  </button>
+                                </>
+                              ) : showMenuForPnLManual ? (
                                 <button className={styles.popoverItem} role="menuitem" onClick={switchToConnection}>
                                   Client to connect
                                 </button>
@@ -870,6 +938,16 @@ export const IndicativeOfferDocuments = ({
                                     onClick={() => startReassign(doc.id)}
                                   >
                                     Reassign document type
+                                  </button>
+                                  <button
+                                    className={styles.popoverItem}
+                                    role="menuitem"
+                                    onClick={() => {
+                                      setDocs((prev) => prev.map((d) => d.id === doc.id ? { ...d, status: "not-applicable" as const, fileName: undefined } : d));
+                                      setOpenMenuId(null);
+                                    }}
+                                  >
+                                    Mark as not applicable
                                   </button>
                                   <button
                                     className={`${styles.popoverItem} ${styles.popoverItemDanger}`}
@@ -921,6 +999,9 @@ export const IndicativeOfferDocuments = ({
               {clientDocs.map((doc) => {
                 const showMenuForPnLConnection = doc.id === "6" && doc.status === "awaiting-connection";
                 const showPopover = showMenuForPnLConnection;
+                // Never show "uploaded" in the client section — if the row is being moved to broker
+                // section the state update will handle it, but guard defensively here too
+                const clientDisplayStatus = doc.status === "uploaded" ? ("awaiting-connection" as const) : doc.status;
 
                 return (
                   <div
@@ -947,7 +1028,7 @@ export const IndicativeOfferDocuments = ({
                       )}
                     </div>
                     <div>
-                      <Badge content={BADGE_LABEL[doc.status]} status={BADGE_STATUS[doc.status]} hideDot />
+                      <Badge content={BADGE_LABEL[clientDisplayStatus]} status={BADGE_STATUS[clientDisplayStatus]} hideDot />
                     </div>
                     <div />
                     <div className={styles.menuCell}>

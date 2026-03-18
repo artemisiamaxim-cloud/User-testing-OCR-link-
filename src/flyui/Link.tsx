@@ -19,7 +19,7 @@ export const Link = ({ onClick, className, children }: LinkProps) => {
         cursor: "pointer",
         fontSize: "inherit",
         fontWeight: "inherit",
-        textDecoration: "underline",
+        textDecoration: "none",
         lineHeight: "inherit",
       }}
     >

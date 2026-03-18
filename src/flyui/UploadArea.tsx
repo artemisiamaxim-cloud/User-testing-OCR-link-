@@ -39,7 +39,7 @@ export const UploadArea = ({ onFilesAdded, acceptedFileTypes, sizeLimitMB, multi
         <path d="M12 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3m7 0h3a2 2 0 0 1 2 2v3M12 4v8m0-8 3 3m-3-3-3 3M16 16l2 2 4-4" />
       </svg>
       <span style={{ fontSize: "var(--typography-fontSize-sm)", fontWeight: 600, color: "var(--palette-content-neutral-subtle)" }}>
-        Drag and drop here or click to upload
+        Drag and drop your client&rsquo;s files here. We&rsquo;ll sort them for you.
       </span>
     </div>
   );
