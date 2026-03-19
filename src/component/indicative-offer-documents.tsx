@@ -276,14 +276,22 @@ export const IndicativeOfferDocuments = ({
                 const tid = lastTargetId;
                 next = next.map((d) => (d.id === tid ? { ...d, status: "uploaded" as const, fileName } : d));
               } else {
-                // Row already uploaded — insert a duplicate after the last matching row
+                // Row already uploaded
+                const isArApType = targetRowName === "AR/AP Report (required if trades on terms)";
                 let lastMatchIdx = -1;
                 next.forEach((d, i) => { if (d.name === targetRowName) lastMatchIdx = i; });
                 if (lastMatchIdx !== -1) {
-                  const newId = `dup-${Date.now()}-${fileIdx}`;
-                  lastTargetId = newId;
-                  const clone: DocumentRow = { ...next[lastMatchIdx], id: newId, status: "uploaded" as const, fileName };
-                  next = [...next.slice(0, lastMatchIdx + 1), clone, ...next.slice(lastMatchIdx + 1)];
+                  if (isArApType) {
+                    // AR/AP Report: duplicate the row (Scan.pdf scenario)
+                    const newId = `dup-${Date.now()}-${fileIdx}`;
+                    lastTargetId = newId;
+                    const clone: DocumentRow = { ...next[lastMatchIdx], id: newId, status: "uploaded" as const, fileName };
+                    next = [...next.slice(0, lastMatchIdx + 1), clone, ...next.slice(lastMatchIdx + 1)];
+                  } else {
+                    // All other types: replace the file on the existing row
+                    lastTargetId = next[lastMatchIdx].id;
+                    next = next.map((d, i) => i === lastMatchIdx ? { ...d, status: "uploaded" as const, fileName } : d);
+                  }
                 }
               }
             } else {
